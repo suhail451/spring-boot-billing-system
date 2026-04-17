@@ -5,12 +5,14 @@ import BillingSystem.Project.Entity.Product;
 import BillingSystem.Project.Repositories.ProductRepo;
 import BillingSystem.Project.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+
 @RestController
 @CrossOrigin(origins = "http://127.0.0.1:5500") // CRITICAL: This allows your frontend to access the API
 
@@ -18,44 +20,46 @@ public class ProductController {
 
     @Autowired
     ProductService ps;
-    @Autowired
-    private ProductRepo pr;
 
     @GetMapping("view_all")
-    public List<Product> viewALL(){
+    public ResponseEntity<List<Product>> viewALL(){
 
-        return ps.viewProducts();
+        List<Product> myProducts=ps.viewProducts();
+        return ResponseEntity.status(HttpStatus.OK).body(myProducts);
 
     }
 
 
 // Search the product you want :
   @GetMapping("search/{name}")
-  public List<Product> findbysearch(@PathVariable String name){
-
-      return ps.search(name);
+  public ResponseEntity<List<Product>> findBySearch(@PathVariable String name){
+      List<Product> mySearch=ps.search(name);
+      if(mySearch.isEmpty()){
+          return ResponseEntity.notFound().build();
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(mySearch);
 
   }
 
 //   Delete the product from list
     @DeleteMapping("delete/{id}")
-    public String delete(@PathVariable Long id){
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id){
 
         ps.deleteProduct(id);
 
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
-        return "Item deleted";
 
     }
 
     @PostMapping("addProduct")
-    public Product newProduct(@RequestParam("name") String product_name){
+    public ResponseEntity<Product> newProduct(@RequestParam("name") String product_name){
         Product product = new Product(product_name);
         product.setName(product_name);
 
-        ps.addProduct(product);
+         Product myProduct = ps.addProduct(product);
 
-        return product;
+        return ResponseEntity.status(HttpStatus.CREATED).body(myProduct);
         }
 
 

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RM Store - Product Master</title>
+    <link rel="stylesheet" href="inventry.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+     <script src="inventry.js"></script>
+</head>
+<body>
+ 
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-balance-scale logo-icon"></i>
+                <span class="brand-name">RM Store</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="createBill.html"><i class="fas fa-file-alt"></i> Create Bill</a></li>
+                    <li class="active"><a href="inventory.html"><i class="fas fa-boxes"></i> Inventry Managment</a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> Customer Data</a></li>
+                    <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </nav>
+ 
+            <div class="sidebar-footer">
+                <p>User: Rashid Majid</p>
+            </div>
+        </aside>
+ 
+        <main class="content-area">
+            <header class="top-nav">
+                <p>Home > <span>Product Master</span></p>
+            </header>
+ 
+            <section class="inventory-container">
+                <div class="glass-card action-bar">
+                    <input type="text" id="searchInput" placeholder="Search Product..." oninput="searchProduct()">
+                    <button class="btn-add" onclick="openModal()">Add</button>
+                </div>
+ 
+                <div class="glass-card table-wrapper">
+                    <table id="productTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">ID</th>
+                                <th>Product Name</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+ 
+    <!-- Add Product Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <h3>Add New Product</h3>
+ 
+            <!-- Input + Buttons (default view) -->
+            <div id="modalInputSection">
+                <input type="text" id="newProductName" placeholder="Enter Product Name">
+                <div class="modal-btns">
+                    <button class="btn-save" onclick="saveProduct()">Save</button>
+                    <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                </div>
+            </div>
+ 
+            <!-- Confirmation message (shown after save) -->
+            <div id="modalConfirmSection" style="display:none;">
+                <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                <p class="success-msg">Product add ho gaye hai </p>
+                <button class="btn-ok" onclick="closeModal()">OK</button>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="delete-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3>Delete Product?</h3>
+            <p class="delete-msg">Bhi sahi btao product delete krna hay </p>
+            <div class="modal-btns">
+                <button class="btn-save" onclick="confirmDelete()">Yes</button>
+                <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+ 
+</body>
+</html>
+ 

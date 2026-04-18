@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RM Store - Billing System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+        <i class="fas fa-balance-scale logo-icon"></i>
+        <h2>RM Store</h2>
+    </div>
+    <ul class="nav-links">
+        <li>
+            <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </li>
+        
+        <li class="active"><i class="fas fa-file-invoice"></i> Create Bill</li>
+        <li>
+            <a href="inventry.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-home"></i> Inventry Managment
+            </a>
+        </li>
+        <li><i class="fas fa-users"></i> Customer Data</li>
+        <li><i class="fas fa-cog"></i> Settings</li>
+    </ul>
+    <div class="sidebar-footer">
+        <p>User: Rashid Majid</p>
+    </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="breadcrumbs">Home > <strong>Create Bill</strong></div>
+            </div>
+
+            <div class="container">
+                <div class="input-section">
+                    <input type="text" id="productSearch" placeholder="Search Product..." oninput="searchProducts()">
+                    <div id="searchResults" class="dropdown" style="display: none;"></div>
+                    
+                    <input type="number" id="priceInput" placeholder="Price">
+                    <button id="addBtn" onclick="addItem()">Add</button>
+                </div>
+
+                <div id="invoice" class="invoice-box" style="display: none;">
+                    <h2 class="store-title">Rashid Majid Kiryana Store</h2>
+                    
+                    <div class="invoice-header">
+                        <div>Bill ID: <span id="dispId"></span></div>
+                        <div>Date: <span id="dispDate"></span></div>
+                    </div>
+                    <hr class="dashed-line">
+                    <table id="billTable">
+                        <thead>
+                            <tr>
+                                <th class="col-product">Product</th>
+                                <th class="col-price">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <div class="total-section">
+                        <strong>Total: <span id="totalAmt">0</span></strong>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <button id="printBtn" onclick="window.print()">Print Invoice</button>
+                    <button id="saveBtn" onclick="saveAndNewBill()">Save Bill</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="customModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3 id="modalTitle">Confirmation</h3>
+            <p id="modalMessage">Kya aap is bill ko save karke naya bill shuru karna chahte hain?</p>
+            <div class="modal-buttons">
+                <button id="confirmYes" class="btn-confirm">OK</button>
+                <button id="confirmNo" class="btn-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

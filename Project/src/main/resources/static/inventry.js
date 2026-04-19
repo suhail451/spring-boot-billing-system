@@ -50,18 +50,32 @@ async function saveProduct() {
             method: 'POST'
         });
  
-        if (response.ok) {
-            // Input section hide karo, confirmation show karo
-            document.getElementById("modalInputSection").style.display = "none";
-            document.getElementById("modalConfirmSection").style.display = "block";
-            document.getElementById("newProductName").value = "";
-            loadProducts(); // List refresh karo
-        }
+        // 1. Check if everything went well (Status 200-299)
+       if (response.ok) {
+                   // Hide error box if it was showing
+                   document.getElementById("errorBox").style.display = "none";
+
+                   document.getElementById("modalInputSection").style.display = "none";
+                   document.getElementById("modalConfirmSection").style.display = "block";
+                   document.getElementById("newProductName").value = "";
+                   loadProducts();
+               }
+               else {
+                   const errorData = await response.json();
+
+                   // Get the UI elements
+                   const errorBox = document.getElementById("errorBox");
+                   const errorMessage = document.getElementById("errorMessage");
+
+                   // Put the message in and show the box
+                   errorMessage.innerText = "Nahi bhi! " + errorData.message;
+                   errorBox.style.display = "block";
+               }
     } catch (error) {
-        alert("Product add nahi ho saki.");
+        // This only runs if the SERVER IS DOWN
+        alert("Server se connection nahi ho pa raha.");
     }
 }
- 
 // 5. Table Render Function
 function renderTable(products) {
     const tbody = document.getElementById("productBody");
@@ -116,10 +130,18 @@ async function confirmDelete() {
  
 function openModal() {
     // Reset modal to default state (input view)
-    document.getElementById("modalInputSection").style.display = "block";
-    document.getElementById("modalConfirmSection").style.display = "none";
-    document.getElementById("addModal").style.display = "flex";
-    document.getElementById("newProductName").focus();
+        document.getElementById("newProductName").value = "";
+
+        // 2. Hide the error box so it doesn't show the old message
+        document.getElementById("errorBox").style.display = "none";
+
+        // 3. Make sure the input section is visible (if you previously hid it)
+        document.getElementById("modalInputSection").style.display = "block";
+        document.getElementById("modalConfirmSection").style.display = "none";
+        document.getElementById("modalInputSection").style.display = "block";
+        document.getElementById("modalConfirmSection").style.display = "none";
+        document.getElementById("addModal").style.display = "flex";
+        document.getElementById("newProductName").focus();
 }
  
 function closeModal() {

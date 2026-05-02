@@ -8,7 +8,9 @@ public class ErrorResponce {
     public ErrorResponce() {
     }
 
-    public ErrorResponce(String message, String productNotFound) {
+    public ErrorResponce(String message, String code) {
+        this.message = message;
+        this.code = code;
     }
 
     public String getCode() {

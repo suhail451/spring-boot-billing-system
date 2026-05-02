@@ -17,7 +17,7 @@ public class BillController {
     @Autowired
     private BillService bs;
 
-    @PostMapping("create")
+    @PostMapping("/create")
     public ResponseEntity<Bill> newBill(){
        Bill savedBill=bs.createBill();
 

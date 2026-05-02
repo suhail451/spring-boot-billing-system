@@ -14,7 +14,7 @@ import java.util.List;
 
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5500") // CRITICAL: This allows your frontend to access the API
+@CrossOrigin(origins = "*") // CRITICAL: This allows your frontend to access the API
 
 public class ProductController {
 

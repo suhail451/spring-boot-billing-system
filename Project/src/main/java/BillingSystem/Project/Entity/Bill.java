@@ -19,6 +19,7 @@ public class Bill {
 
     LocalDate date;
 
+
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JsonManagedReference // This tells JSON to "Look inside" for the items
     List<BillItem> billItems;
@@ -30,6 +31,7 @@ public class Bill {
     public Bill(Long id, LocalDate date, List<BillItem> billItems) {
         this.id = id;
         this.date = date;
+
         this.billItems = billItems;
     }
 
@@ -48,6 +50,8 @@ public class Bill {
     public void setDate(LocalDate date) {
         this.date = date;
     }
+
+
 
     public List<BillItem> getBillItems() {
         return billItems;

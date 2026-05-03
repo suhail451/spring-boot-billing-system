@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RM Store - POS Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-bg: #2c3e50;
+            --active-bg: #34495e;
+            --green-accent: #2ecc71;
+            --text-light: #ecf0f1;
+            --body-bg: #f4f7f9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+
+        .app-container { display: flex; width: 100%; height: 100vh; }
+
+        /* Sidebar */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 25px; display: flex; align-items: center; gap: 15px; }
+        .logo-icon { font-size: 1.8rem; color: var(--green-accent); }
+        .brand-name { font-size: 1.4rem; font-weight: bold; }
+        .sidebar-nav { flex: 1; }
+        .sidebar-nav ul { list-style: none; }
+        .sidebar-nav li { padding: 15px 25px; transition: 0.2s; }
+        .sidebar-nav li a { color: #bdc3c7; text-decoration: none; display: flex; align-items: center; gap: 12px; }
+        .sidebar-nav li.active { background-color: var(--active-bg); border-left: 5px solid var(--green-accent); }
+        .sidebar-nav li.active a { color: var(--green-accent); }
+        .sidebar-nav li:hover:not(.active) { background-color: #3d566e; }
+        .sidebar-footer { padding: 20px; font-size: 0.85rem; color: #95a5a6; border-top: 1px solid #3e4f5f; }
+
+        /* Main Content */
+        .content-area { flex: 1; background-color: var(--body-bg); overflow-y: auto; }
+        .top-nav { padding: 15px 30px; background: white; font-size: 0.9rem; color: #7f8c8d; border-bottom: 1px solid #e0e0e0; }
+        .top-nav span { color: #2c3e50; font-weight: bold; }
+
+        /* POS Container */
+        .pos-container { padding: 40px 30px; }
+
+        .pos-header { margin-bottom: 35px; }
+        .pos-header h1 { font-size: 1.8rem; color: #2c3e50; font-weight: 700; }
+        .pos-header p { color: #7f8c8d; font-size: 0.95rem; margin-top: 5px; }
+
+        /* Date Display */
+        .date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        .date-badge i { color: var(--green-accent); }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid transparent;
+        }
+
+        .stat-card.green { border-left-color: var(--green-accent); }
+        .stat-card.blue { border-left-color: #3498db; }
+        .stat-card.orange { border-left-color: #e67e22; }
+
+        .stat-card .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 18px;
+        }
+
+        .stat-card.green .card-icon { background: rgba(46, 204, 113, 0.12); color: var(--green-accent); }
+        .stat-card.blue .card-icon { background: rgba(52, 152, 219, 0.12); color: #3498db; }
+        .stat-card.orange .card-icon { background: rgba(230, 126, 34, 0.12); color: #e67e22; }
+
+        .stat-card .card-label { font-size: 0.85rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        .stat-card .card-value { font-size: 2rem; font-weight: 700; color: #2c3e50; margin-top: 6px; }
+        .stat-card .card-sub { font-size: 0.8rem; color: #bdc3c7; margin-top: 4px; }
+
+        /* Main Action Button */
+        .action-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .action-section h2 {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .action-section p {
+            color: #95a5a6;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        .btn-check-sales {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.35);
+            letter-spacing: 0.02em;
+        }
+
+        .btn-check-sales:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(46, 204, 113, 0.45);
+        }
+
+        .btn-check-sales:active {
+            transform: translateY(0);
+        }
+
+        .btn-check-sales i { font-size: 1.2rem; }
+
+        /* Result Display */
+        .result-box {
+            display: none;
+            margin-top: 35px;
+            background: linear-gradient(135deg, #f8fffe, #e8f8f0);
+            border: 2px solid rgba(46, 204, 113, 0.3);
+            border-radius: 16px;
+            padding: 35px;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-box .result-label {
+            font-size: 0.9rem;
+            color: #27ae60;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .result-box .result-amount {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #2c3e50;
+            letter-spacing: -0.02em;
+        }
+
+        .result-box .result-amount .currency {
+            font-size: 1.8rem;
+            color: #7f8c8d;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .result-box .result-date {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #95a5a6;
+        }
+
+        .result-box .result-date span {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: none;
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(255,255,255,0.4);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .btn-check-sales.loading .btn-text { display: none; }
+        .btn-check-sales.loading .spinner { display: block; }
+
+        /* Zero state */
+        .zero-state {
+            margin-top: 20px;
+            padding: 16px;
+            background: #fff3cd;
+            border-radius: 10px;
+            color: #856404;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-balance-scale logo-icon"></i>
+            <span class="brand-name">RM Store</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="createBill.html"><i class="fas fa-file-alt"></i> Create Bill</a></li>
+                <li><a href="inventry.html"><i class="fas fa-boxes"></i> Inventory Management</a></li>
+                <li class="active"><a href="pos.html"><i class="fas fa-cash-register"></i> POS Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Customer Data</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>User: Rashid Majid</p>
+        </div>
+    </aside>
+
+    <main class="content-area">
+        <header class="top-nav">
+            <p>Home > <span>POS Dashboard</span></p>
+        </header>
+
+        <div class="pos-container">
+
+            <div class="pos-header">
+                <h1><i class="fas fa-cash-register" style="color: var(--green-accent); margin-right: 10px;"></i>Point of Sale</h1>
+                <p>Daily sales summary and transaction overview</p>
+                <div class="date-badge">
+                    <i class="fas fa-calendar-day"></i>
+                    <span id="todayDate">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="cards-grid">
+                <div class="stat-card green">
+                    <div class="card-icon"><i class="fas fa-rupee-sign"></i></div>
+                    <div class="card-label">Today's Revenue</div>
+                    <div class="card-value" id="quickTotal">—</div>
+                    <div class="card-sub">Click button below to refresh</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="card-icon"><i class="fas fa-file-invoice"></i></div>
+                    <div class="card-label">System Status</div>
+                    <div class="card-value" style="font-size: 1.1rem; margin-top: 12px;">Active</div>
+                    <div class="card-sub">RM Store Billing System</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="card-icon"><i class="fas fa-clock"></i></div>
+                    <div class="card-label">Last Checked</div>
+                    <div class="card-value" id="lastChecked" style="font-size: 1rem; margin-top: 12px;">Never</div>
+                    <div class="card-sub">Real-time from database</div>
+                </div>
+            </div>
+
+            <!-- Main Action -->
+            <div class="action-section">
+                <h2>Daily Sales Report</h2>
+                <p>Aaj ki tamam bills ki total amount check karein</p>
+
+                <button class="btn-check-sales" onclick="checkTodaySales()">
+                    <span class="spinner"></span>
+                    <i class="fas fa-chart-line btn-text"></i>
+                    <span class="btn-text">Check Total Sale of Today</span>
+                </button>
+
+                <!-- Result -->
+                <div class="result-box" id="resultBox">
+                    <div class="result-label"><i class="fas fa-check-circle"></i> &nbsp;Today's Total Sales</div>
+                    <div class="result-amount">
+                        <span class="currency">Rs.</span>
+                        <span id="totalAmount">0</span>
+                    </div>
+                    <div class="result-date">
+                        Date: <span id="resultDate">—</span> &nbsp;|&nbsp;
+                        Fetched at: <span id="fetchTime">—</span>
+                    </div>
+                </div>
+
+                <div class="zero-state" id="zeroState">
+                    <i class="fas fa-info-circle"></i>
+                    Aaj abhi tak koi bill nahi bani. Koi transaction record nahi hai.
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script>
+    const BASE_URL = "http://localhost:8080";
+
+    // Show today's date on load
+    window.addEventListener("DOMContentLoaded", () => {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById("todayDate").innerText = now.toLocaleDateString('en-PK', options);
+    });
+
+    async function checkTodaySales() {
+        const btn = document.querySelector(".btn-check-sales");
+        const resultBox = document.getElementById("resultBox");
+        const zeroState = document.getElementById("zeroState");
+
+        // Loading state
+        btn.classList.add("loading");
+        resultBox.style.display = "none";
+        zeroState.style.display = "none";
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/bills/today-sales`);
+
+            if (!response.ok) {
+                throw new Error("Server se data nahi mila");
+            }
+
+            const total = await response.json();
+
+            // Update quick stat card
+            document.getElementById("quickTotal").innerText = "Rs. " + total.toLocaleString('en-PK');
+
+            // Update last checked time
+            const now = new Date();
+            document.getElementById("lastChecked").innerText = now.toLocaleTimeString('en-PK');
+
+            // Show result
+            const dateStr = now.toLocaleDateString('en-PK', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById("totalAmount").innerText = total.toLocaleString('en-PK', { minimumFractionDigits: 2 });
+            document.getElementById("resultDate").innerText = dateStr;
+            document.getElementById("fetchTime").innerText = now.toLocaleTimeString('en-PK');
+
+            if (total === 0) {
+                zeroState.style.display = "block";
+            } else {
+                resultBox.style.display = "block";
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Server se connection nahi hua. Spring Boot chal raha hai?");
+        } finally {
+            btn.classList.remove("loading");
+        }
+    }
+</script>
+
+</body>
+</html>

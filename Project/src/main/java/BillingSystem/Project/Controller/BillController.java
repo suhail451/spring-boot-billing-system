@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/bills")
@@ -53,6 +56,12 @@ public class BillController {
         return ResponseEntity.ok(total);
 
 
+    }
+
+    @GetMapping("/BillByDate")
+    public ResponseEntity<List<Bill>> getBillByDate(@RequestParam ("date")String dateString) {
+        LocalDate date= LocalDate.parse(dateString);
+        return ResponseEntity.ok(bs.getBillBydate(date));
     }
 
 

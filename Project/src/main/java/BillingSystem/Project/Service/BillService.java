@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class BillService {
@@ -41,11 +42,16 @@ public class BillService {
         return total != null ? total : 0.0;
     }
 
+    public Double getWeeklySales() {
+        LocalDate today = LocalDate.now();
 
-    public Double getWeeklySales(){
-        LocalDate start=LocalDate.now().minusDays(7);
-        LocalDate end=LocalDate.now();
-        Double total=br.getTotalSalesByDateRange(start,end);
+        // Logic: Find the most recent Monday (or today if it is Monday)
+        LocalDate start = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+
+        // Logic: The end date for "This Week" is today
+        LocalDate end = today;
+
+        Double total = br.getTotalSalesByDateRange(start, end);
         return total != null ? total : 0.0;
     }
 
@@ -56,8 +62,10 @@ public class BillService {
         Double total = br.getTotalSalesByMonth(month, year);
         return total != null ? total : 0.0;
     }
+    public List<Bill> getBillBydate(LocalDate date){
+        return br.findBillByDate(date);
 
-
+    }
 
 
 }

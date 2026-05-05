@@ -68,7 +68,7 @@
     (function() {
         // ========== PERSISTENT SESSION TIME ==========
         const SESSION_STORAGE_KEY = 'pos_session_start_time';
-
+        
         function getSessionStartTime() {
             let sessionStart = localStorage.getItem(SESSION_STORAGE_KEY);
             if (!sessionStart) {
@@ -77,7 +77,7 @@
             }
             return parseInt(sessionStart);
         }
-
+        
         function updateSessionTime() {
             const sessionStart = getSessionStartTime();
             const elapsedSeconds = Math.floor((Date.now() - sessionStart) / 1000);
@@ -87,102 +87,83 @@
             const sessionElem = document.getElementById('sessionTime');
             if (sessionElem) sessionElem.textContent = `${hours}:${mins}:${secs}`;
         }
-
-        // ========== EXACT SAME CODE AS ORDER HISTORY ==========
+        
+        // ========== BACKEND API CONFIGURATION ==========
         const BASE_URL = "http://localhost:8080";
-
-        // EXACT same function from orderHistory.js to calculate bill total
-        function calcBillTotal(bill) {
+        
+        // Helper: Calculate bill total from billItems (same as orderHistory.js)
+        function calculateBillTotal(bill) {
             if (!bill.billItems || bill.billItems.length === 0) return 0;
-            return bill.billItems.reduce((sum, item) => sum + item.price, 0);
+            return bill.billItems.reduce((sum, item) => sum + (item.price || 0), 0);
         }
-
-        // EXACT same date format as orderHistory.js uses
-        function getTodayDate() {
-            // Returns YYYY-MM-DD format (same as orderHistory.js line: const today = new Date().toISOString().split('T')[0])
-            return new Date().toISOString().split('T')[0];
-        }
-
-        // EXACT same fetch logic as orderHistory.js searchBillsByDate function
+        
+        // ========== FETCH TODAY'S BILLS FROM BACKEND (USING SAME API AS ORDER HISTORY) ==========
         async function fetchTodayBills() {
-            const dateValue = getTodayDate();
-            console.log("Fetching bills for date:", dateValue);
-
             try {
-                // EXACT same API endpoint as orderHistory.js
-                const response = await fetch(`${BASE_URL}/api/bills/BillByDate?date=${dateValue}`);
-
-                console.log("Response status:", response.status);
-
+                // Get today's date in YYYY-MM-DD format
+                const today = new Date().toISOString().split('T')[0];
+                const response = await fetch(`${BASE_URL}/api/bills/BillByDate?date=${today}`);
+                
                 if (!response.ok) {
-                    throw new Error("HTTP " + response.status);
+                    throw new Error(`HTTP ${response.status}`);
                 }
-
+                
                 const bills = await response.json();
-                console.log("Bills received:", bills);
-                console.log("Number of bills:", bills.length);
-
                 return bills;
             } catch (error) {
-                console.error("fetchTodayBills error:", error);
+                console.error("Failed to fetch today's bills:", error);
                 return [];
             }
         }
-
-        // Update UI with bills data
+        
+        // ========== UPDATE UI WITH BACKEND DATA ==========
         async function updateStatsUI() {
             try {
                 const bills = await fetchTodayBills();
-
-                // Calculate total sales using same calcBillTotal function
+                
+                // Calculate total sales from bills (sum of all bill totals)
                 let totalSales = 0;
-                for (let i = 0; i < bills.length; i++) {
-                    const billTotal = calcBillTotal(bills[i]);
-                    totalSales += billTotal;
-                    console.log(`Bill #${bills[i].id}: Rs ${billTotal}`);
+                for (const bill of bills) {
+                    totalSales += calculateBillTotal(bill);
                 }
-
+                
                 const billCount = bills.length;
-
+                
                 const salesElem = document.getElementById('todaySales');
                 const billCountElem = document.getElementById('billCount');
-
+                
                 if (salesElem) {
-                    const formattedTotal = totalSales.toLocaleString('en-PK', {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
+                    const formattedTotal = totalSales.toLocaleString('en-PK', { 
+                        minimumFractionDigits: 0, 
+                        maximumFractionDigits: 0 
                     });
                     salesElem.textContent = `Rs ${formattedTotal}`;
-                    console.log(`Total Sales displayed: Rs ${formattedTotal}`);
                 }
-
+                
                 if (billCountElem) {
                     billCountElem.textContent = `${billCount} bills today`;
-                    console.log(`Bill count displayed: ${billCount} bills today`);
                 }
-
-                // If still showing 0, show warning in console
-                if (billCount === 0) {
-                    console.warn("⚠️ No bills found for today's date:", getTodayDate());
-                    console.warn("Check if backend has bills for this date");
-                }
-
+                
+                console.log(`✅ Today: ${billCount} bills, Total Sales: Rs ${totalSales}`);
+                
             } catch (error) {
                 console.error("Failed to update stats:", error);
-                document.getElementById('todaySales').textContent = 'Rs 0';
-                document.getElementById('billCount').textContent = '0 bills today';
+                const salesElem = document.getElementById('todaySales');
+                const billCountElem = document.getElementById('billCount');
+                if (salesElem) salesElem.textContent = 'Rs 0';
+                if (billCountElem) billCountElem.textContent = '0 bills today';
             }
         }
-
-        // ========== AUTO-REFRESH EVERY 10 SECONDS (faster for debugging) ==========
+        
+        // ========== AUTO-REFRESH EVERY 30 SECONDS ==========
         let refreshInterval = setInterval(() => {
             updateStatsUI();
-        }, 10000);
-
+        }, 30000);
+        
         window.addEventListener('beforeunload', () => {
             if (refreshInterval) clearInterval(refreshInterval);
         });
-
+        
         // ========== LIVE CLOCK ==========
         function updateLiveClock() {
             const now = new Date();
@@ -192,11 +173,11 @@
         }
         updateLiveClock();
         setInterval(updateLiveClock, 1000);
-
+        
         // ========== SESSION TIMER ==========
         updateSessionTime();
         setInterval(updateSessionTime, 1000);
-
+        
         // ========== LOGOUT ==========
         window.handleLogout = function(e) {
             if (confirm('Are you sure you want to exit the POS system? Session will be closed.')) {
@@ -204,12 +185,11 @@
                 window.location.href = 'login.html';
             }
         };
-
+        
         // ========== INITIAL LOAD ==========
         updateStatsUI();
-
-        console.log("✅ Home page now using EXACT same code as orderHistory.js");
-        console.log("Today's date being used:", getTodayDate());
+        
+        console.log("✅ Home page now using same API as orderHistory.js - /api/bills/BillByDate");
     })();
 </script>
 </body>

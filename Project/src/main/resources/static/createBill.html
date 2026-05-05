@@ -4,99 +4,142 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RM Store - Billing System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="createBill.css">
 </head>
 <body>
 
-    <div class="app-container">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-        <i class="fas fa-balance-scale logo-icon"></i>
-        <h2>RM Store</h2>
-    </div>
-    <ul class="nav-links">
-        <li>
-            <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-home"></i> Home
-            </a>
-        </li>
-        <li>
-            <a href="pos.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-cash-register"></i> POS Dashboard
-            </a>
-        </li>
-        
-        <li class="active"><i class="fas fa-file-invoice"></i> Create Bill</li>
-        <li>
-            <a href="inventry.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-home"></i> Inventry Managment
-            </a>
-        </li>
-        <li><i class="fas fa-users"></i> Order History</li>
-        <li><i class="fas fa-cog"></i> Settings</li>
-    </ul>
-    <div class="sidebar-footer">
-        <p>User: Rashid Majid</p>
-    </div>
-        </nav>
-
-        <main class="main-content">
-            <div class="top-bar">
-                <div class="breadcrumbs">Home > <strong>Create Bill</strong></div>
-            </div>
-
-            <div class="container">
-                <div class="input-section">
-                    <input type="text" id="productSearch" placeholder="Search Product..." oninput="searchProducts()">
-                    <div id="searchResults" class="dropdown" style="display: none;"></div>
-                    
-                    <input type="number" id="priceInput" placeholder="Price">
-                    <button id="addBtn" onclick="addItem()">Add</button>
-                </div>
-
-                <div id="invoice" class="invoice-box" style="display: none;">
-                    <h2 class="store-title">Rashid Majid Kiryana Store</h2>
-                    
-                    <div class="invoice-header">
-                        <div>Bill ID: <span id="dispId"></span></div>
-                        <div>Date: <span id="dispDate"></span></div>
-                    </div>
-                    <hr class="dashed-line">
-                    <table id="billTable">
-                        <thead>
-                            <tr>
-                                <th class="col-product">Product</th>
-                                <th class="col-price">Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                    <div class="total-section">
-                        <strong>Total: <span id="totalAmt">0</span></strong>
-                    </div>
-                </div>
-
-                <div class="control-panel">
-                    <button id="printBtn" onclick="window.print()">Print Invoice</button>
-                    <button id="saveBtn" onclick="saveAndNewBill()">Save Bill</button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <div id="customModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <h3 id="modalTitle">Confirmation</h3>
-            <p id="modalMessage">Kya aap is bill ko save karke naya bill shuru karna chahte hain?</p>
-            <div class="modal-buttons">
-                <button id="confirmYes" class="btn-confirm">OK</button>
-                <button id="confirmNo" class="btn-cancel">Cancel</button>
-            </div>
+<!-- Save Confirmation Popup -->
+<div id="saveModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-icon"><i class="fas fa-receipt"></i></div>
+        <h2 class="modal-title">Bill Save Kardo?</h2>
+        <p class="modal-sub">Bill save hoga aur interface reset ho jayega naye bill ke liye.</p>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+            <button class="modal-btn confirm" onclick="confirmSave()">Save Bill</button>
         </div>
     </div>
+</div>
 
-    <script src="script.js"></script>
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-balance-scale logo-icon"></i>
+            <span class="brand-name">RM Store</span>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="pos.html"><i class="fas fa-cash-register"></i> POS Dashboard</a></li>
+                <li class="active"><a href="createBill.html"><i class="fas fa-file-invoice"></i> Create Bill</a></li>
+                <li><a href="inventry.html"><i class="fas fa-boxes"></i> Inventory</a></li>
+                <li><a href="OrderHistory.html"><i class="fas fa-history"></i> Order History</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="content-area">
+        <div class="top-nav">
+            <span>Home &rsaquo; <strong>Create Bill</strong></span>
+            <div id="liveClock" class="live-clock">--:--:--</div>
+        </div>
+
+        <div class="page-container">
+            <div class="page-header">
+                <h1>Create <span>New Bill</span></h1>
+            </div>
+
+            <div class="input-panel">
+                <div class="input-group search-group">
+                    <label>Search Product</label>
+                    <input type="text" id="productSearch" placeholder="Product name..." oninput="searchProducts()" autocomplete="off">
+                    <div id="searchResults" class="dropdown"></div>
+                </div>
+                <div class="input-group price-grp">
+                    <label>Price</label>
+                    <input type="number" id="priceInput" placeholder="0.00">
+                </div>
+                <button id="addBtn" class="btn-green" onclick="addItem()">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+
+            <div id="invoice" class="invoice-box" style="display: none;">
+                <div class="thermal-header">
+                    <div class="store-logo-area">
+                        <i class="fas fa-store store-icon"></i>
+                    </div>
+                    <h2 class="store-title">RASHID MAJID</h2>
+                    <p class="store-sub">Kiryana Store</p>
+                    <p class="print-location">Karachi, Sindh, Pakistan</p>
+                    <p class="print-location">Tel: 0300-0000000</p>
+                </div>
+
+                <div class="receipt-divider">
+                    <span>★ ★ ★</span>
+                </div>
+
+                <div class="invoice-meta">
+                    <div class="meta-row">
+                        <span class="meta-label">Bill No:</span>
+                        <span class="meta-value" id="dispId">#000</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Date:</span>
+                        <span class="meta-value" id="dispDate">--/--/--</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Time:</span>
+                        <span class="meta-value" id="dispTime">--:--</span>
+                    </div>
+                </div>
+
+                <div class="dashed-line"></div>
+
+                <table id="billTable">
+                    <thead>
+                        <tr>
+                            <th class="col-product">Item</th>
+                            <th class="col-price">Amount</th>
+                            <th class="col-action"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <div class="dashed-line"></div>
+
+                <div class="total-section">
+                    <span class="total-label">GRAND TOTAL</span>
+                    <span class="total-amount">Rs. <span id="totalAmt">0</span></span>
+                </div>
+
+                <div class="thermal-footer">
+                    <div class="footer-divider"></div>
+                    <p class="thank-you">✦ THANK YOU ✦</p>
+                    <p class="visit-again">Please visit again!</p>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <button class="btn-blue" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+                <button class="btn-green" onclick="openSaveModal()"><i class="fas fa-save"></i> Save</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- script.js loaded first - contains all logic including confirmSave, openSaveModal, closeModal, showToast -->
+<script src="script.js"></script>
+<script>
+    // Clock only - all other logic is in script.js
+    function updateClock() {
+        document.getElementById('liveClock').textContent = new Date().toLocaleTimeString('en-PK', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
 </body>
 </html>

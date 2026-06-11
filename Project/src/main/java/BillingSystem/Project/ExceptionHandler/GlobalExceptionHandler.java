@@ -2,8 +2,12 @@ package BillingSystem.Project.ExceptionHandler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;  // ← IMPORT
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice  // ← YE ADD KARO
 public class GlobalExceptionHandler {
@@ -30,5 +34,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity EmptyField(MethodInputNotValid nv){
         ErrorResponce myError = new ErrorResponce(nv.getMessage(), "Field can not be empty");
         return new ResponseEntity<>(myError, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
+
+        String message = ex.getBindingResult()
+                .getFieldError()
+                .getDefaultMessage();
+
+        Map<String, String> response = new HashMap<>();
+        response.put("can not add value less than 1 ", message);
+
+        return ResponseEntity.badRequest().body(response);
     }
 }

@@ -14,5 +14,5 @@ public interface ProductRepo extends JpaRepository<Product,Long> {
     List<Product> findByNameContainingIgnoreCaseAndIstrueTrue(String name);
     List<Product> findAllByIstrueTrue();
     Boolean existsByName(String name);
-
+    Product findByNameIgnoreCase(String name);
 }

@@ -1,5 +1,5 @@
 package BillingSystem.Project.Entity;
-
+import jakarta.validation.constraints.Min;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
@@ -11,7 +11,9 @@ public class BillItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double price;
+        @Min(value = 1, message = "Price cannot be less than 1")
+        private double price;
+
 
     @JoinColumn
     @ManyToOne
@@ -65,6 +67,8 @@ public class BillItem {
     }
 
     public void setPrice(double price) {
-        this.price = price;
-    }
+
+        this.price = price;}
+
+
 }

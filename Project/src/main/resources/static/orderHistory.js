@@ -1,196 +1,164 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Rashid Majid Kiryana Store | POS System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css">
-</head>
-<body>
+const BASE_URL = "http://localhost:8080";
 
-<div class="portal-wrapper">
-    <header class="shop-header">
-        <h1 class="shop-title">Rashid Majid Kiryana Store</h1>
-        <p class="shop-tagline">Yahan sab ko sab milta hay</p>
-        <div class="system-status">
-            <span class="status-dot"></span>
-            <span class="status-text">System Online</span>
-            <span class="status-sep">|</span>
-            <span id="clock" class="live-clock">--:--:--</span>
-        </div>
-    </header>
+// ── Live Clock ──────────────────────────────────────────────
+function updateClock() {
+    const now = new Date();
+    document.getElementById("liveClock").textContent =
+        now.toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+setInterval(updateClock, 1000);
+updateClock();
 
-    <main class="portal-content">
-        <div class="stats-center">
-            <div class="stat-card">
-                <div class="stat-label"><i class="fas fa-receipt"></i> Today's Sales</div>
-                <div class="stat-value" id="todaySales">Rs 0</div>
-                <div class="stat-meta" id="billCount">0 bills today</div>
+// ── Hide all result states ───────────────────────────────────
+function hideAllStates() {
+    document.getElementById("hintState").style.display = "none";
+    document.getElementById("resultsArea").classList.remove("show");
+    document.getElementById("emptyState").classList.remove("show");
+    document.getElementById("errorState").classList.remove("show");
+    document.getElementById("statsBar").classList.remove("show");
+}
+
+// ── Main Search Function ─────────────────────────────────────
+async function searchBillsByDate() {
+    const dateInput = document.getElementById("dateInput");
+    const date = dateInput.value;
+
+    if (!date) {
+        dateInput.focus();
+        return;
+    }
+
+    const btn = document.getElementById("searchBtn");
+    btn.classList.add("loading");
+    hideAllStates();
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/bills/BillByDate?date=${date}`);
+
+        if (!response.ok) throw new Error("Server error: " + response.status);
+
+        const bills = await response.json();
+
+        if (!bills || bills.length === 0) {
+            document.getElementById("emptyState").classList.add("show");
+            return;
+        }
+
+        renderStats(bills);
+        renderBills(bills, date);
+
+    } catch (err) {
+        console.error("Order history fetch error:", err);
+        document.getElementById("errorState").classList.add("show");
+    } finally {
+        btn.classList.remove("loading");
+    }
+}
+
+// ── Render Stats Bar ─────────────────────────────────────────
+function renderStats(bills) {
+    let totalItems = 0;
+    let totalRevenue = 0;
+
+    bills.forEach(bill => {
+        if (bill.billItems) {
+            totalItems += bill.billItems.length;
+            totalRevenue += bill.billItems.reduce((sum, i) => sum + i.price, 0);
+        }
+    });
+
+    document.getElementById("statBills").textContent   = bills.length;
+    document.getElementById("statItems").textContent   = totalItems;
+    document.getElementById("statRevenue").textContent = "Rs. " + totalRevenue.toLocaleString("en-PK");
+
+    document.getElementById("statsBar").classList.add("show");
+}
+
+// ── Render Bill Cards ────────────────────────────────────────
+function renderBills(bills, date) {
+    const list = document.getElementById("billsList");
+    list.innerHTML = "";
+
+    const formatted = new Date(date).toLocaleDateString("en-PK", {
+        weekday: "long", year: "numeric", month: "long", day: "numeric"
+    });
+    document.getElementById("resultsTitle").textContent     = `${bills.length} Bill(s) Found`;
+    document.getElementById("resultsDateBadge").textContent = formatted;
+
+    bills.forEach(bill => {
+        const total = bill.billItems
+            ? bill.billItems.reduce((s, i) => s + i.price, 0)
+            : 0;
+
+        const itemRows = bill.billItems && bill.billItems.length > 0
+            ? bill.billItems.map((item, idx) => `
+                <tr>
+                    <td style="width:60px;padding-left:24px;color:var(--text-muted);font-size:0.82rem;">${idx + 1}</td>
+                    <td>
+                        <div class="product-name-cell">
+                            <div class="product-dot"></div>
+                            ${item.product ? item.product.name : "Unknown Product"}
+                        </div>
+                    </td>
+                    <td>Rs. ${item.price.toLocaleString("en-PK")}</td>
+                </tr>`).join("")
+            : `<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px;">
+                Is bill mein koi item nahi hai
+               </td></tr>`;
+
+        const card = document.createElement("div");
+        card.className = "bill-card";
+        card.innerHTML = `
+            <div class="bill-card-header" onclick="toggleCard(this)">
+                <div class="bill-id-wrap">
+                    <span class="bill-id-badge">#${bill.id}</span>
+                    <div>
+                        <div class="bill-id-label">Bill #${bill.id}</div>
+                        <div class="bill-id-sub">${bill.billItems ? bill.billItems.length : 0} item(s)</div>
+                    </div>
+                </div>
+                <div class="bill-header-right">
+                    <div class="bill-total-badge">
+                        <span class="rs">Rs.</span>${total.toLocaleString("en-PK")}
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label"><i class="fas fa-clock"></i> Session Time</div>
-                <div class="stat-value" id="sessionTime">00:00:00</div>
-                <div class="stat-meta">Active Session</div>
-            </div>
-        </div>
+            <div class="bill-items-wrap">
+                <table class="bill-items-table">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">#</th>
+                            <th>Product</th>
+                            <th style="text-align:right;">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>${itemRows}</tbody>
+                </table>
+                <div class="bill-items-footer">
+                    <span class="footer-label">Total:</span>
+                    <span class="footer-total"><span class="rs">Rs. </span>${total.toLocaleString("en-PK")}</span>
+                </div>
+            </div>`;
 
-        <div class="nav-grid">
-            <a href="createBill.html" class="nav-card">
-                <div class="card-icon-wrap"><i class="fas fa-file-invoice-dollar"></i></div>
-                <h3 class="card-title">Create Bill</h3>
-                <p class="card-desc">Process new sales and print receipts.</p>
-            </a>
+        list.appendChild(card);
+    });
 
-            <a href="inventry.html" class="nav-card">
-                <div class="card-icon-wrap"><i class="fas fa-boxes"></i></div>
-                <h3 class="card-title">Inventory</h3>
-                <p class="card-desc">Manage stock levels and pricing.</p>
-            </a>
+    document.getElementById("resultsArea").classList.add("show");
+}
 
-            <a href="orderHistory.html" class="nav-card">
-                <div class="card-icon-wrap"><i class="fas fa-history"></i></div>
-                <h3 class="card-title">Order History</h3>
-                <p class="card-desc">Review logs and transactions.</p>
-            </a>
-        </div>
+// ── Expand / Collapse Card ───────────────────────────────────
+function toggleCard(header) {
+    header.parentElement.classList.toggle("expanded");
+}
 
-        <div class="portal-footer">
-            <button class="logout-btn" onclick="handleLogout(event)">
-                <i class="fas fa-power-off"></i> Exit System
-            </button>
-        </div>
-    </main>
-</div>
+// ── On Page Load ─────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("dateInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") searchBillsByDate();
+    });
 
-<script>
-    (function() {
-        // ========== PERSISTENT SESSION TIME ==========
-        const SESSION_STORAGE_KEY = 'pos_session_start_time';
-        
-        function getSessionStartTime() {
-            let sessionStart = localStorage.getItem(SESSION_STORAGE_KEY);
-            if (!sessionStart) {
-                sessionStart = Date.now();
-                localStorage.setItem(SESSION_STORAGE_KEY, sessionStart);
-            }
-            return parseInt(sessionStart);
-        }
-        
-        function updateSessionTime() {
-            const sessionStart = getSessionStartTime();
-            const elapsedSeconds = Math.floor((Date.now() - sessionStart) / 1000);
-            const hours = String(Math.floor(elapsedSeconds / 3600)).padStart(2, '0');
-            const mins = String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2, '0');
-            const secs = String(elapsedSeconds % 60).padStart(2, '0');
-            const sessionElem = document.getElementById('sessionTime');
-            if (sessionElem) sessionElem.textContent = `${hours}:${mins}:${secs}`;
-        }
-        
-        // ========== BACKEND API CONFIGURATION ==========
-        const BASE_URL = "http://localhost:8080";
-        
-        // Helper: Calculate bill total from billItems (same as orderHistory.js)
-        function calculateBillTotal(bill) {
-            if (!bill.billItems || bill.billItems.length === 0) return 0;
-            return bill.billItems.reduce((sum, item) => sum + (item.price || 0), 0);
-        }
-        
-        // ========== FETCH TODAY'S BILLS FROM BACKEND (USING SAME API AS ORDER HISTORY) ==========
-        async function fetchTodayBills() {
-            try {
-                // Get today's date in YYYY-MM-DD format
-                const today = new Date().toISOString().split('T')[0];
-                const response = await fetch(`${BASE_URL}/api/bills/BillByDate?date=${today}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const bills = await response.json();
-                return bills;
-            } catch (error) {
-                console.error("Failed to fetch today's bills:", error);
-                return [];
-            }
-        }
-        
-        // ========== UPDATE UI WITH BACKEND DATA ==========
-        async function updateStatsUI() {
-            try {
-                const bills = await fetchTodayBills();
-                
-                // Calculate total sales from bills (sum of all bill totals)
-                let totalSales = 0;
-                for (const bill of bills) {
-                    totalSales += calculateBillTotal(bill);
-                }
-                
-                const billCount = bills.length;
-                
-                const salesElem = document.getElementById('todaySales');
-                const billCountElem = document.getElementById('billCount');
-                
-                if (salesElem) {
-                    const formattedTotal = totalSales.toLocaleString('en-PK', { 
-                        minimumFractionDigits: 0, 
-                        maximumFractionDigits: 0 
-                    });
-                    salesElem.textContent = `Rs ${formattedTotal}`;
-                }
-                
-                if (billCountElem) {
-                    billCountElem.textContent = `${billCount} bills today`;
-                }
-                
-                console.log(`✅ Today: ${billCount} bills, Total Sales: Rs ${totalSales}`);
-                
-            } catch (error) {
-                console.error("Failed to update stats:", error);
-                const salesElem = document.getElementById('todaySales');
-                const billCountElem = document.getElementById('billCount');
-                if (salesElem) salesElem.textContent = 'Rs 0';
-                if (billCountElem) billCountElem.textContent = '0 bills today';
-            }
-        }
-        
-        // ========== AUTO-REFRESH EVERY 30 SECONDS ==========
-        let refreshInterval = setInterval(() => {
-            updateStatsUI();
-        }, 30000);
-        
-        window.addEventListener('beforeunload', () => {
-            if (refreshInterval) clearInterval(refreshInterval);
-        });
-        
-        // ========== LIVE CLOCK ==========
-        function updateLiveClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-PK', { hour12: false });
-            const clockSpan = document.getElementById('clock');
-            if (clockSpan) clockSpan.textContent = timeStr;
-        }
-        updateLiveClock();
-        setInterval(updateLiveClock, 1000);
-        
-        // ========== SESSION TIMER ==========
-        updateSessionTime();
-        setInterval(updateSessionTime, 1000);
-        
-        // ========== LOGOUT ==========
-        window.handleLogout = function(e) {
-            if (confirm('Are you sure you want to exit the POS system? Session will be closed.')) {
-                localStorage.removeItem(SESSION_STORAGE_KEY);
-                window.location.href = 'login.html';
-            }
-        };
-        
-        // ========== INITIAL LOAD ==========
-        updateStatsUI();
-        
-        console.log("✅ Home page now using same API as orderHistory.js - /api/bills/BillByDate");
-    })();
-</script>
-</body>
-</html>
+    // Default to today's date
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("dateInput").value = today;
+});

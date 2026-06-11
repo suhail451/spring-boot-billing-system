@@ -42,23 +42,36 @@ function selectProduct(id, name) {
     document.getElementById('productSearch').value = name;
     document.getElementById('searchResults').innerHTML = '';
     document.getElementById('searchResults').style.display = 'none';
+    clearPriceError();
     document.getElementById('priceInput').focus();
 }
 
 // 2. Add Button Logic
 async function addItem() {
     const priceValue = document.getElementById('priceInput').value;
-    if (!selectedProductId || !priceValue) {
-        alert("Meharbani karke product select karein aur qeemat darj karein.");
+    const price = parseFloat(priceValue);
+
+    // Frontend validation — catch before even hitting the server
+    if (!selectedProductId) {
+        showPriceError("Pehle koi product select karein.");
         return;
     }
+    if (!priceValue || isNaN(price)) {
+        showPriceError("Qeemat darj karein.");
+        return;
+    }
+    if (price <= 0) {
+        showPriceError("Qeemat 0 ya usse kam nahi ho sakti. Sahi qeemat likhein.");
+        return;
+    }
+
+    // Clear any previous error
+    clearPriceError();
 
     try {
         // currentBillId is null after save, so a fresh bill gets created
         if (!currentBillId) {
-            const bRes = await fetch('http://localhost:8080/api/bills/create', {
-                method: 'POST'
-            });
+            const bRes = await fetch('http://localhost:8080/api/bills/create', { method: 'POST' });
             const bData = await bRes.json();
             currentBillId = bData.id;
             console.log("New bill created:", currentBillId);
@@ -67,7 +80,7 @@ async function addItem() {
         const payload = {
             billId: currentBillId,
             productId: selectedProductId,
-            price: parseFloat(priceValue)
+            price: price
         };
 
         const addRes = await fetch('http://localhost:8080/addItem', {
@@ -81,11 +94,56 @@ async function addItem() {
             document.getElementById('priceInput').value = '';
             selectedProductId = null;
             document.getElementById('searchResults').style.display = 'none';
+            clearPriceError();
             await updateInvoiceUI();
+        } else {
+            // Backend ne error diya — readable message dikhao
+            let msg = "Kuch masla hua, dobara koshish karein.";
+            try {
+                const errData = await addRes.json();
+                if (errData && errData.message) msg = errData.message;
+            } catch (_) { /* backend ne JSON nahi diya, default message use karo */ }
+            showPriceError(msg);
         }
     } catch (err) {
         console.error("System Error", err);
+        showPriceError("Server se connection nahi ho pa raha.");
     }
+}
+
+// Helper: price input ke neeche red error dikhao
+function showPriceError(message) {
+    let errEl = document.getElementById('priceErrorMsg');
+    if (!errEl) {
+        errEl = document.createElement('div');
+        errEl.id = 'priceErrorMsg';
+        errEl.style.cssText = `
+            color: #e74c3c;
+            font-size: 0.82rem;
+            margin-top: 5px;
+            padding: 6px 10px;
+            background: #fdecea;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            display: inline-block;
+        `;
+        // Price input ke baad insert karo
+        const priceInput = document.getElementById('priceInput');
+        priceInput.parentNode.insertBefore(errEl, priceInput.nextSibling);
+    }
+    errEl.textContent = '⚠ ' + message;
+    errEl.style.display = 'inline-block';
+
+    // Price input ko highlight karo
+    document.getElementById('priceInput').style.border = '1.5px solid #e74c3c';
+}
+
+// Helper: error clear karo
+function clearPriceError() {
+    const errEl = document.getElementById('priceErrorMsg');
+    if (errEl) errEl.style.display = 'none';
+    const priceInput = document.getElementById('priceInput');
+    if (priceInput) priceInput.style.border = '1px solid #ddd';
 }
 
 // 3. Update Invoice UI
@@ -134,9 +192,7 @@ async function updateInvoiceUI() {
     }
 }
 
-// 4. confirmSave - single authoritative version
-// Called by the Save modal confirm button in HTML
-// Resets currentBillId so next addItem() starts a completely fresh bill
+// 4. confirmSave - resets state so next addItem() starts a fresh bill
 async function confirmSave() {
     if (!currentBillId) return;
 
@@ -160,7 +216,7 @@ async function confirmSave() {
     showToast('✓ Bill save ho gaya!');
 }
 
-// 5. openSaveModal - guard: only open if there is an active bill
+// 5. openSaveModal - only opens if there is an active bill
 function openSaveModal() {
     if (!currentBillId) {
         alert('Pehle kuch products add karein phir save hoga.');
@@ -207,5 +263,13 @@ document.addEventListener('click', function (e) {
     const results = document.getElementById('searchResults');
     if (search && results && !search.contains(e.target) && !results.contains(e.target)) {
         results.style.display = 'none';
+    }
+});
+
+// 10. Clear price error as soon as user starts correcting the value
+document.addEventListener('DOMContentLoaded', function () {
+    const priceInput = document.getElementById('priceInput');
+    if (priceInput) {
+        priceInput.addEventListener('input', clearPriceError);
     }
 });

@@ -24,6 +24,7 @@ public class BillItemService {
     private BillService billservice;
 
 
+
     public void createBillItem(Long bill_id, Long product_id,Double price){
 //        bill object ki id uthao or yaha lekr ao
         Bill bill = billservice.ShowBill(bill_id);
@@ -43,8 +44,8 @@ public class BillItemService {
 //          bill b set kro or fir price b dalo
 
         item.setBill(bill);
-        item.setProduct(product);
         item.setPrice(price);
+        item.setProduct(product);
 //        ab us billItem ko save krlo
 
         bl.save(item);

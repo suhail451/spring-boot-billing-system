@@ -30,11 +30,13 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/signup",
                                 "/login.html",
+                                "/auth.css",
                                 "/signup.html",
-                                "/css/**",
+                                                                "/css/**",
                                 "/js/**",
                                 "/signup.js",
                                 "/"
+//                                "/auth.css"
                         ).permitAll()
 
                         .anyRequest().authenticated()

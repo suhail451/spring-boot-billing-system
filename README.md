@@ -25,27 +25,27 @@ Below is a walkthrough of the application screens in the order a user would typi
 ### 1. Home Page
 The landing screen of the application, giving users entry into the system after login.
 
-![Home Page](images/HomePage.jpeg)
+<img src="Project/src/main/images/HomePage.jpeg" width="900">
 
 ### 2. Bill Dashboard
 Create a new bill, save it, and print the invoice directly from this screen.
 
-![Bill Dashboard](images/Bill_Dashoard.jpeg)
+![Bill Dashboard](Project/src/main/images/Bill_Dashoard.jpeg)
 
 ### 3. Inventory Dashboard
 Manage stock by adding new inventory items or deleting existing ones.
 
-![Inventory Dashboard](images/Inventry_Dashboard.jpeg)
+![Inventory Dashboard](Project/src/main/images/Inventry_Dashboard.jpeg)
 
 ### 4. POS Dashboard
 Track sales performance with a quick view of today's total sales, this week's sales, and this month's sales.
 
-![POS Dashboard](images/POs-Dashboard.jpeg)
+![POS Dashboard](Project/src/main/images/POs-Dashboard.jpeg)
 
 ### 5. History
 Review past bills, including which invoices were printed on any given date.
 
-![History](images/History.jpeg)
+![History](Project/src/main/images/History.jpeg)
 
 ## Getting Started
 
@@ -72,17 +72,19 @@ The application will start on `http://localhost:8080` (or your configured port).
 ## Project Structure
 
 ```
-project-root/
-├── src/
-│   ├── main/
-│   │   ├── java/          # Spring Boot backend source
-│   │   └── resources/     # Static frontend (HTML, CSS, JS), templates, config
-├── images/                 # README screenshots
-│   ├── HomePage.jpeg
-│   ├── Bill_Dashoard.jpeg
-│   ├── Inventry_Dashboard.jpeg
-│   ├── POs-Dashboard.jpeg
-│   └── History.jpeg
+repo-root/
+├── .idea/
+├── Project/
+│   └── src/
+│       └── main/
+│           ├── java/          # Spring Boot backend source
+│           ├── resources/     # Static frontend (HTML, CSS, JS), templates, config
+│           └── images/        # README screenshots
+│               ├── HomePage.jpeg
+│               ├── Bill_Dashoard.jpeg
+│               ├── Inventry_Dashboard.jpeg
+│               ├── POs-Dashboard.jpeg
+│               └── History.jpeg
 └── README.md
 ```
 

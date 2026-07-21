@@ -20,7 +20,7 @@ public class Bill {
     LocalDate date;
 
 
-    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonManagedReference // This tells JSON to "Look inside" for the items
     List<BillItem> billItems;
 
